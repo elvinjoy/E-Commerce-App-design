@@ -1,25 +1,49 @@
-const { register, login } = require('../Functions/userAuthFunction');
+const {
+  registerUser,
+  loginUser,
+  checkAddress,
+  updateAddress
+} = require('../Functions/userAuthFunction');
 
 const registerController = async (req, res) => {
-  const { username, email, password, phone, address, pincode } = req.body;
-
   try {
-    const { user, token } = await register(username, email, password, phone, address, pincode);
-    res.status(201).json({ user, token });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+    const result = await registerUser(req.body);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong!", error: error.message });
   }
 };
 
 const loginController = async (req, res) => {
-  const { email, password } = req.body;
-
   try {
-    const { user, token } = await login(email, password);
-    res.status(200).json({ user, token });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+    const result = await loginUser(req.body);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(401).json({ message: "Login failed!", error: error.message });
   }
 };
 
-module.exports = { registerController, loginController };
+const checkAddressFields = async (req, res) => {
+  try {
+    const result = await checkAddress(req.userId);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong!", error: error.message });
+  }
+};
+
+const updateMissingAddressFields = async (req, res) => {
+  try {
+    const result = await updateAddress(req.userId, req.body);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ message: "Update failed!", error: error.message });
+  }
+};
+
+module.exports = {
+  registerController,
+  loginController,
+  checkAddressFields,
+  updateMissingAddressFields,
+};

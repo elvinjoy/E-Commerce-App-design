@@ -1,5 +1,3 @@
-// userAuthMiddleware.js
-
 const jwt = require('jsonwebtoken');
 const { USER_JWT_SECRET } = require('../Config/config');
 

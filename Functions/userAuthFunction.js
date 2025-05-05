@@ -1,62 +1,86 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { USER_JWT_SECRET, JWT_EXPIRE } = require("../Config/config");
-const User = require("../Model/userModel");
-const { validateEmail, validatePassword } = require("../Utils/validators");
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const User = require('../Model/userModel'); // adjust the path as needed
+const { USER_JWT_SECRET } = require('../Config/config');
 
-// User registration
+const registerUser = async (data) => {
+  const { username, email, password } = data;
 
-const register = async (username, email, password, phone, address, pincode) => {
-  validateEmail(email);
-  validatePassword(password);
+  const existing = await User.findOne({ email });
+  if (existing) throw new Error("Email already exists");
 
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
-    throw new Error("Email is already in use");
-  }
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-  const newUser = new User({
+  const newUser = await User.create({
     username,
     email,
-    password,
-    phone,
-    address,
-    pincode,
-    role: "user",
+    password: hashedPassword,
   });
 
-  // Save the user to the database
-  await newUser.save();
-
-  // Generate JWT token
-  const token = jwt.sign(
-    { userId: newUser._id, role: newUser.role },
-    USER_JWT_SECRET,
-    { expiresIn: JWT_EXPIRE }
-  );
-
-  return { user: newUser, token };
+  return { message: "Registration successful", user: newUser };
 };
 
-// User login
-const login = async (email, password) => {
+const loginUser = async ({ email, password }) => {
   const user = await User.findOne({ email });
-  if (!user) {
-    throw new Error("User not found");
-  }
+  if (!user) throw new Error("Invalid credentials");
 
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    throw new Error("Invalid password");
-  }
+  if (!isMatch) throw new Error("Invalid credentials");
 
-  const token = jwt.sign(
-    { userId: user._id, role: user.role },
-    USER_JWT_SECRET,
-    { expiresIn: JWT_EXPIRE }
-  );
+  const token = jwt.sign({ userId: user.userNumber }, USER_JWT_SECRET, { expiresIn: '7d' });
 
-  return { user, token };
+  return {
+    message: "Login successful",
+    token,
+    user: {
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      userNumber: user.userNumber
+    }
+  };
 };
 
-module.exports = { register, login };
+const checkAddress = async (userNumber) => {
+  const user = await User.findOne({ userNumber });
+
+  if (!user) throw new Error("User not found");
+
+  const missingFields = [];
+
+  if (!user.address) missingFields.push('address');
+  if (!user.phone) missingFields.push('phone');
+  if (!user.pincode) missingFields.push('pincode');
+
+  return {
+    message: missingFields.length === 0
+      ? "All address fields are present"
+      : "address fields are missing",
+    missingFields
+  };
+};
+
+const updateAddress = async (userNumber, data) => {
+  const user = await User.findOneAndUpdate(
+    { userNumber },
+    {
+      $set: {
+        address: data.address,
+        phone: data.phone,
+        pincode: data.pincode
+      }
+    },
+    { new: true }
+  );
+
+  if (!user) throw new Error("User not found");
+
+  return { message: "Address updated successfully", user };
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+  checkAddress,
+  updateAddress
+};
