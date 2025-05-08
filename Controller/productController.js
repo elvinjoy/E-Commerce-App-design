@@ -6,7 +6,9 @@ const {
   getProductByIdLogic,
   editProductLogic,
   deleteProductLogic,
-  searchProductsLogic
+  searchProductsLogic,
+  getProductsByCategoryLogic,
+  submitProductRating
 } = require('../Functions/productAuthFunction');
 
 const createProductController = async (req, res) => {
@@ -63,11 +65,39 @@ const searchProductsController = async (req, res) => {
   }
 };
 
+const getProductsByCategoryController = async (req, res) => {
+  try {
+    const response = await getProductsByCategoryLogic(req);
+    res.status(response.status).json(response.body);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const rateProductController = async (req, res) => {
+  try {
+    const { productId, rating } = req.body;
+    const userId = req.user._id;
+
+    const product = await submitProductRating(productId, userId, rating);
+
+    res.status(200).json({
+      message: 'Rating submitted successfully',
+      averageRating: product.averageRating,
+      totalRatings: product.ratings.length
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createProductController,
   getAllProductsController,
   getProductByIdController,
   editProductController,
   deleteProductController,
-  searchProductsController
+  searchProductsController,
+  getProductsByCategoryController,
+  rateProductController
 };

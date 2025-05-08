@@ -7,7 +7,7 @@ const protect = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, USER_JWT_SECRET);
-    req.userId = decoded.userId;
+    req.user = { userNumber: decoded.userId }; // ✅ match with `userId: user.userNumber` from login
     next();
   } catch {
     return res.status(401).json({ message: 'Invalid token' });
