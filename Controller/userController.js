@@ -3,7 +3,7 @@ const {
   loginUser,
   checkAddress,
   updateAddress
-} = require('../Functions/userAuthFunction');
+} = require('../helper/userAuthFunction');
 
 const registerController = async (req, res) => {
   try {

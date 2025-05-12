@@ -9,7 +9,7 @@ const {
   searchProductsLogic,
   getProductsByCategoryLogic,
   submitProductRating,
-} = require("../Functions/productAuthFunction");
+} = require("../helper/productAuthFunction");
 
 const Product = require("../Model/productModel");
 

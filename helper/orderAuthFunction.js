@@ -1,4 +1,4 @@
-const razorpay = require("../service/razorpayInstance");
+const razorpay = require("../Config/razorpayInstance");
 const OrderDetails = require("../Model/orderModel");
 const Product = require("../Model/productModel");
 const User = require("../Model/userModel");

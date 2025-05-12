@@ -1,4 +1,4 @@
-const { adminRegister, adminLogin } = require('../Functions/adminAuthFunction');
+const { adminRegister, adminLogin } = require('../helper/adminAuthFunction');
 
 const adminRegisterController = async (req, res) => {
   const { username, email, password } = req.body;

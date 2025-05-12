@@ -1,4 +1,4 @@
-const { createOrderFunction, updateOrderStatusFunction, getOrderByOrderIdFunction } = require("../Functions/orderAuthFunction");
+const { createOrderFunction, updateOrderStatusFunction, getOrderByOrderIdFunction } = require("../helper/orderAuthFunction");
 const OrderDetails = require("../Model/orderModel");
 
 const createOrderController = async (req, res) => {
