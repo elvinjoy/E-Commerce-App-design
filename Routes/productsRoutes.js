@@ -11,7 +11,8 @@ const {
   deleteProductController,
   searchProductsController,
   getProductsByCategoryController,
-  rateProductController
+  rateProductController,
+  getProductsByRating
 } = require('../Controller/productController');
 
 const { adminProtect, adminOnly } = require('../middleware/adminAuthMiddleware');
@@ -24,5 +25,5 @@ router.delete('/delete/:id', adminProtect, adminOnly, deleteProductController);
 router.get('/search', adminProtect, adminOnly, searchProductsController);
 router.get('/category/:category', getProductsByCategoryController);
 router.post('/rate', protect, rateProductController);
-
+router.get('/by-rating', getProductsByRating);
 module.exports = router;

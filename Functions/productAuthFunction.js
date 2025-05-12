@@ -207,28 +207,29 @@ const submitProductRating = async (productId, userId, ratingValue) => {
   if (ratingValue < 1 || ratingValue > 5) {
     throw new Error('Rating must be between 1 and 5');
   }
-  
+
   const product = await Product.findOne({ productId });
   if (!product) {
     throw new Error('Product not found');
   }
-  
+
   const existingRatingIndex = product.ratings.findIndex(r => r.user === userId);
-  
+
   if (existingRatingIndex >= 0) {
     product.ratings[existingRatingIndex].value = ratingValue;
   } else {
     product.ratings.push({ user: userId, value: ratingValue });
   }
-  
+
+  // Optional: if you want to keep a static 'rating' field updated
   product.rating = product.averageRating;
-  
+
   await product.save();
-  
-  return {
-    averageRating: product.rating,
-    ratings: product.ratings
-  };
+
+  // Fetch updated product with virtuals
+  const updatedProduct = await Product.findOne({ productId }).lean({ virtuals: true });
+
+  return updatedProduct;
 };
 
 

@@ -1,4 +1,4 @@
-const { createOrderFunction } = require("../Functions/orderAuthFunction");
+const { createOrderFunction, updateOrderStatusFunction, getOrderByOrderIdFunction } = require("../Functions/orderAuthFunction");
 const OrderDetails = require("../Model/orderModel");
 
 const createOrderController = async (req, res) => {
@@ -45,7 +45,56 @@ const getAllOrdersController = async (req, res) => {
   }
 };
 
+
+const getOrderByOrderIdController = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await getOrderByOrderIdFunction(orderId);
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      order,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+
+const updateOrderStatusController = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ success: false, message: "Status is required" });
+    }
+
+    const updatedOrder = await updateOrderStatusFunction(orderId, status);
+
+    if (!updatedOrder) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Order status updated successfully",
+      order: updatedOrder,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+
 module.exports = {
   createOrderController,
   getAllOrdersController,
+  getOrderByOrderIdController,
+  updateOrderStatusController
 };

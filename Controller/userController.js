@@ -25,16 +25,17 @@ const loginController = async (req, res) => {
 
 const checkAddressFields = async (req, res) => {
   try {
-    const result = await checkAddress(req.userId);
+    const result = await checkAddress(req.user.userNumber);
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: "Something went wrong!", error: error.message });
   }
 };
 
+
 const updateMissingAddressFields = async (req, res) => {
   try {
-    const result = await updateAddress(req.userId, req.body);
+    const result = await updateAddress(req.user.userNumber, req.body); // ✅ fixed
     res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ message: "Update failed!", error: error.message });

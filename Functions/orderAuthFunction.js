@@ -62,4 +62,30 @@ const createOrderFunction = async ({ user, productId, quantity, amount }) => {
   return order;
 };
 
-module.exports = { createOrderFunction };
+
+const getOrderByOrderIdFunction = async (orderId) => {
+  if (!orderId) {
+    throw new Error("Order ID is required");
+  }
+
+  const order = await OrderDetails.findOne({ orderId });
+
+  return order;
+};
+
+
+const updateOrderStatusFunction = async (orderId, status) => {
+  if (!orderId || !status) {
+    throw new Error("Order ID and status are required");
+  }
+
+  const updatedOrder = await OrderDetails.findOneAndUpdate(
+    { orderId },
+    { $set: { status } },
+    { new: true }
+  );
+
+  return updatedOrder;
+};
+
+module.exports = { createOrderFunction, updateOrderStatusFunction, getOrderByOrderIdFunction };
