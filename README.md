@@ -4,6 +4,8 @@ A full-featured **E-Commerce web application** built with complete **stock**, **
 
 ⚙️ Developed with focus on real-world requirements like **automated stock control**, **order invoices**, and **Razorpay integration**.
 
+- **Backend**: [https://e-commerce-app-design-2.onrender.com/](https://e-commerce-app-design-2.onrender.com/)
+
 ---
 
 ## 🔧 Features
