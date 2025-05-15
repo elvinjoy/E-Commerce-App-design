@@ -1,6 +1,36 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
+const addressSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    enum: ["home", "office"],
+    required: true,
+  },
+  phone: {
+    type: String,
+    required: true,
+    match: /^[0-9]{10}$/,
+  },
+  addressLine: {
+    type: String,
+    required: true,
+  },
+  pincode: {
+    type: String,
+    required: true,
+    match: /^[0-9]{6}$/,
+  },
+  district: {
+    type: String,
+    required: true,
+  },
+  state: {
+    type: String,
+    required: true,
+  }
+}, { _id: false });
+
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -22,27 +52,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "user",
   },
-  phone: {
-    type: String,
-    match: /^[0-9]{10}$/,
-    default: null,
-  },
-  address: {
-    type: String,
-    default: null,
-  },
-  pincode: {
-    type: String,
-    match: /^[0-9]{6}$/,
-    default: null,
-  },
-  state: {
-    type: String,
-    default: null,
-  },
-  district: {
-    type: String,
-    default: null,
+  addresses: {
+    type: [addressSchema],
+    default: [],
   },
   userNumber: {
     type: String,
@@ -62,7 +74,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// Pre-save hook to hash the password and generate userNumber
+// Hash password + generate user number
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -71,12 +83,7 @@ userSchema.pre("save", async function (next) {
     this.password = await bcrypt.hash(this.password, salt);
 
     if (this.isNew) {
-      const lastUser = await this.constructor.findOne(
-        {},
-        {},
-        { sort: { createdAt: -1 } }
-      );
-
+      const lastUser = await this.constructor.findOne({}, {}, { sort: { createdAt: -1 } });
       if (lastUser && lastUser.userNumber) {
         const lastNumber = parseInt(lastUser.userNumber.replace("USER", ""));
         this.userNumber = `USER${String(lastNumber + 1).padStart(3, "0")}`;
@@ -91,7 +98,7 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// Method to compare passwords
+// Compare password method
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };

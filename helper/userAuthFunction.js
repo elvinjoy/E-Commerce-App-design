@@ -3,19 +3,23 @@ const jwt = require('jsonwebtoken');
 const User = require('../Model/userModel'); // adjust the path as needed
 const { USER_JWT_SECRET } = require('../Config/config');
 const nodemailer = require("nodemailer");
-const{ GMAIL_USER, GMAIL_PASS } = require('../Config/config');
+const { validateEmail, validatePassword } = require('../Utils/validators');
+
 
 const registerUser = async (data) => {
   const { username, email, password } = data;
 
+  validateEmail(email);
+  validatePassword(password);
+
+  if (!username || username.length < 3) {
+    throw new Error("Username must be at least 3 characters");
+  }
+
   const existing = await User.findOne({ email });
   if (existing) throw new Error("Email already exists");
 
-  const newUser = await User.create({
-    username,
-    email,
-    password
-  });
+  const newUser = await User.create({ username, email, password });
 
   return {
     message: "Registration successful",
@@ -26,6 +30,7 @@ const registerUser = async (data) => {
     }
   };
 };
+
 
 
 const loginUser = async ({ email, password }) => {
@@ -54,42 +59,55 @@ const checkAddress = async (userNumber) => {
 
   if (!user) throw new Error("User not found");
 
-  const missingFields = [];
+  const requiredFields = ['phone', 'addressLine', 'pincode', 'state', 'district'];
+  const types = ['home', 'office'];
+  const missingFields = {};
 
-  if (!user.address) missingFields.push('address');
-  if (!user.phone) missingFields.push('phone');
-  if (!user.pincode) missingFields.push('pincode');
-  if (!user.state) missingFields.push('state');
-  if (!user.district) missingFields.push('district');
+  types.forEach((type) => {
+    const addr = user.addresses.find(a => a.type === type);
+    if (!addr) {
+      missingFields[type] = 'address missing';
+    } else {
+      const missing = requiredFields.filter(field => !addr[field]);
+      if (missing.length > 0) {
+        missingFields[type] = missing;
+      }
+    }
+  });
 
   return {
-    message: missingFields.length === 0
-      ? "All address fields are present"
-      : "Address fields are missing",
+    message: Object.keys(missingFields).length === 0
+      ? "All required addresses and fields are present"
+      : "Some address fields are missing",
     missingFields
   };
 };
 
 
 const updateAddress = async (userNumber, data) => {
-  const user = await User.findOneAndUpdate(
-    { userNumber },
-    {
-      $set: {
-        address: data.address,
-        phone: data.phone,
-        pincode: data.pincode,
-        state: data.state,
-        district: data.district
-      }
-    },
-    { new: true }
-  );
+  const { type, phone, addressLine, pincode, state, district } = data;
+  if (!['home', 'office'].includes(type)) {
+    throw new Error("Address type must be 'home' or 'office'");
+  }
 
+  const user = await User.findOne({ userNumber });
   if (!user) throw new Error("User not found");
 
-  return { message: "Address updated successfully", user };
+  const index = user.addresses.findIndex(a => a.type === type);
+
+  const newAddress = { type, phone, addressLine, pincode, state, district };
+
+  if (index !== -1) {
+    user.addresses[index] = newAddress;
+  } else {
+    user.addresses.push(newAddress);
+  }
+
+  await user.save();
+
+  return { message: `${type} address updated successfully`, addresses: user.addresses };
 };
+
 
 
 const sendOtpToEmail = async (email) => {
@@ -145,12 +163,16 @@ const verifyOtp = async (email, otp) => {
 };
 
 const resetPassword = async (email, newPassword) => {
+  validateEmail(email);           // Checks valid email format
+  validatePassword(newPassword); // Checks password rules (e.g., min 8 chars)
+
   const user = await User.findOne({ email });
   if (!user) throw new Error("User not found");
 
-  user.password = newPassword; // plain text — will be hashed in schema
+  user.password = newPassword; // Plain text — should be hashed in pre-save hook
   user.otp = null;
   user.otpExpires = null;
+
   await user.save();
 
   return { message: "Password reset successful" };
