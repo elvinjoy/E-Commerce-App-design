@@ -2,7 +2,10 @@ const {
   registerUser,
   loginUser,
   checkAddress,
-  updateAddress
+  updateAddress,
+  sendOtpToEmail,
+  verifyOtp,
+  resetPassword
 } = require('../helper/userAuthFunction');
 
 const registerController = async (req, res) => {
@@ -42,9 +45,49 @@ const updateMissingAddressFields = async (req, res) => {
   }
 };
 
+const sendOtpController = async (req, res) => {
+  try {
+    const { email } = req.body;
+    console.log(email);
+    const result = await sendOtpToEmail(email);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to send OTP", error: error.message });
+  }
+};
+
+
+const verifyOtpController = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const result = await verifyOtp(email, otp);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ message: "OTP verification failed", error: error.message });
+  }
+};
+
+const resetPasswordController = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+      return res.status(400).json({ message: "Email and new password are required" });
+    }
+
+    const result = await resetPassword(email, newPassword);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ message: "Password reset failed", error: error.message });
+  }
+};
+
 module.exports = {
   registerController,
   loginController,
   checkAddressFields,
   updateMissingAddressFields,
+  sendOtpController,
+  verifyOtpController,
+  resetPasswordController
 };

@@ -39,6 +39,8 @@ const createOrderFunction = async ({ user, productId, quantity, amount }) => {
       phone: fullUser.phone,
       address: fullUser.address,
       pincode: fullUser.pincode,
+      state: fullUser.state,
+      district: fullUser.district,
     },
     product: {
       productId: product.productId,
@@ -62,7 +64,6 @@ const createOrderFunction = async ({ user, productId, quantity, amount }) => {
   return order;
 };
 
-
 const getOrderByOrderIdFunction = async (orderId) => {
   if (!orderId) {
     throw new Error("Order ID is required");
@@ -72,7 +73,6 @@ const getOrderByOrderIdFunction = async (orderId) => {
 
   return order;
 };
-
 
 const updateOrderStatusFunction = async (orderId, status) => {
   if (!orderId || !status) {
@@ -88,4 +88,8 @@ const updateOrderStatusFunction = async (orderId, status) => {
   return updatedOrder;
 };
 
-module.exports = { createOrderFunction, updateOrderStatusFunction, getOrderByOrderIdFunction };
+module.exports = {
+  createOrderFunction,
+  updateOrderStatusFunction,
+  getOrderByOrderIdFunction,
+};

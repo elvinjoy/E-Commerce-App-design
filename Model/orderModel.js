@@ -8,7 +8,9 @@ const orderDetailsSchema = new Schema({
     email: String,
     phone: String,
     address: String,
-    pincode: String
+    pincode: String,
+    state: String,     // ✅ added
+    district: String   // ✅ added
   },
   product: {
     productId: String,
@@ -17,7 +19,7 @@ const orderDetailsSchema = new Schema({
     price: Number,
     category: String,
     images: [String],
-    quantity: { type: Number, required: true } // Added quantity field
+    quantity: { type: Number, required: true }
   },
   amountPaid: Number,
   paymentId: String,

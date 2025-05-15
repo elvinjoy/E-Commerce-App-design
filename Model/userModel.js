@@ -1,67 +1,87 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
     min: 3,
-    unique: true
+    unique: true,
   },
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   password: {
     type: String,
     required: true,
-    min: 8
+    min: 8,
   },
   role: {
     type: String,
-    default: 'user'  // Role is 'user' by default when a user is created
+    default: "user",
   },
   phone: {
     type: String,
     match: /^[0-9]{10}$/,
-    default: null
+    default: null,
   },
   address: {
     type: String,
-    default: null
+    default: null,
   },
   pincode: {
     type: String,
     match: /^[0-9]{6}$/,
-    default: null
+    default: null,
+  },
+  state: {
+    type: String,
+    default: null,
+  },
+  district: {
+    type: String,
+    default: null,
   },
   userNumber: {
     type: String,
-    unique: true
+    unique: true,
+  },
+  otp: {
+    type: String,
+    default: null,
+  },
+  otpExpires: {
+    type: Date,
+    default: null,
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 // Pre-save hook to hash the password and generate userNumber
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
 
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 
     if (this.isNew) {
-      const lastUser = await this.constructor.findOne({}, {}, { sort: { createdAt: -1 } });
+      const lastUser = await this.constructor.findOne(
+        {},
+        {},
+        { sort: { createdAt: -1 } }
+      );
 
       if (lastUser && lastUser.userNumber) {
-        const lastNumber = parseInt(lastUser.userNumber.replace('USER', ''));
-        this.userNumber = `USER${String(lastNumber + 1).padStart(3, '0')}`;
+        const lastNumber = parseInt(lastUser.userNumber.replace("USER", ""));
+        this.userNumber = `USER${String(lastNumber + 1).padStart(3, "0")}`;
       } else {
-        this.userNumber = 'USER001';
+        this.userNumber = "USER001";
       }
     }
 
@@ -72,8 +92,8 @@ userSchema.pre('save', async function(next) {
 });
 
 // Method to compare passwords
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model("User", userSchema);
