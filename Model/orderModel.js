@@ -9,8 +9,8 @@ const orderDetailsSchema = new Schema({
     phone: String,
     address: String,
     pincode: String,
-    state: String,     // ✅ added
-    district: String   // ✅ added
+    state: String,
+    district: String
   },
   product: {
     productId: String,
@@ -23,6 +23,8 @@ const orderDetailsSchema = new Schema({
   },
   amountPaid: Number,
   paymentId: String,
+  paymentMethod: { type: String, default: 'prepaid', required: false },
+  paymentType: { type: String, default: 'offline', required: false },
   orderId: String,
   status: { type: String, default: 'Processing' },
   createdAt: { type: Date, default: Date.now }
