@@ -191,6 +191,21 @@ const displaySpecificUser = async (userNumber) => {
   return { user, userOrders };
 };
 
+const searchUser = async (value) => {
+  const user = await User.findOne({
+    $or: [
+      { userNumber: value },
+      { email: value },
+      { username: value }
+    ]
+  });
+
+  if (!user) throw new Error("User not found");
+
+  const userOrders = await Order.find({ "user.userId": user._id });
+  return { user, userOrders };
+};
+
 
 module.exports = {
   registerUser,
@@ -201,5 +216,6 @@ module.exports = {
   verifyOtp,
   resetPassword,
   displayAllUsers,
-  displaySpecificUser
+  displaySpecificUser,
+  searchUser
 };

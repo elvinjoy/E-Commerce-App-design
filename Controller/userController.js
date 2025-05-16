@@ -7,7 +7,8 @@ const {
   verifyOtp,
   resetPassword,
   displayAllUsers,
-  displaySpecificUser
+  displaySpecificUser,
+  searchUser
 } = require('../helper/userAuthFunction');
 
 const registerController = async (req, res) => {
@@ -103,6 +104,17 @@ const displaySpecificUserController = async (req, res) => {
   }
 };
 
+const searchUserController = async (req, res) => {
+  try {
+    const { value } = req.params; // use `value` instead of `userNumber`
+    const data = await searchUser(value);
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to retrieve user", error: error.message });
+  }
+};
+
+
 
 module.exports = {
   registerController,
@@ -113,5 +125,6 @@ module.exports = {
   verifyOtpController,
   resetPasswordController,
   displayAllUsersController,
-  displaySpecificUserController
+  displaySpecificUserController,
+  searchUserController
 };

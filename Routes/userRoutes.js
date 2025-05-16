@@ -8,7 +8,8 @@ const {
   verifyOtpController,
   resetPasswordController,
   displayAllUsersController,
-  displaySpecificUserController
+  displaySpecificUserController,
+  searchUserController
 } = require('../Controller/userController');
 const { protect } = require('../middleware/userAuthMiddleware');
 const { adminProtect } = require('../middleware/adminAuthMiddleware');
@@ -25,4 +26,6 @@ router.post('/reset-password', resetPasswordController);
 
 router.get('/all-users',adminProtect, displayAllUsersController);
 router.get('/specific-user/:userNumber',adminProtect, displaySpecificUserController);
+router.get('/search-user/:value',adminProtect, searchUserController); // Changed to value
+
 module.exports = router;
