@@ -6,10 +6,12 @@ const {
   updateMissingAddressFields,
   sendOtpController,
   verifyOtpController,
-  resetPasswordController
+  resetPasswordController,
+  displayAllUsersController,
+  displaySpecificUserController
 } = require('../Controller/userController');
 const { protect } = require('../middleware/userAuthMiddleware');
-
+const { adminProtect } = require('../middleware/adminAuthMiddleware');
 const router = express.Router();
 
 router.post('/register', registerController);
@@ -21,4 +23,6 @@ router.post("/send-otp", sendOtpController);
 router.post("/verify-otp", verifyOtpController);
 router.post('/reset-password', resetPasswordController);
 
+router.get('/all-users',adminProtect, displayAllUsersController);
+router.get('/specific-user/:userNumber',adminProtect, displaySpecificUserController);
 module.exports = router;

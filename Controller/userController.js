@@ -5,7 +5,9 @@ const {
   updateAddress,
   sendOtpToEmail,
   verifyOtp,
-  resetPassword
+  resetPassword,
+  displayAllUsers,
+  displaySpecificUser
 } = require('../helper/userAuthFunction');
 
 const registerController = async (req, res) => {
@@ -82,6 +84,26 @@ const resetPasswordController = async (req, res) => {
   }
 };
 
+const displayAllUsersController = async (req, res) => {
+  try {
+    const users = await displayAllUsers();
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to retrieve users", error: error.message });
+  }
+}
+
+const displaySpecificUserController = async (req, res) => {
+  try {
+    const { userNumber } = req.params;
+    const data = await displaySpecificUser(userNumber);
+    res.status(200).json(data); // Will contain both user and userOrders
+  } catch (error) {
+    res.status(500).json({ message: "Failed to retrieve user", error: error.message });
+  }
+};
+
+
 module.exports = {
   registerController,
   loginController,
@@ -89,5 +111,7 @@ module.exports = {
   updateMissingAddressFields,
   sendOtpController,
   verifyOtpController,
-  resetPasswordController
+  resetPasswordController,
+  displayAllUsersController,
+  displaySpecificUserController
 };

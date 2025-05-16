@@ -4,7 +4,7 @@ const User = require('../Model/userModel'); // adjust the path as needed
 const { USER_JWT_SECRET } = require('../Config/config');
 const nodemailer = require("nodemailer");
 const { validateEmail, validatePassword } = require('../Utils/validators');
-
+const Order = require('../Model/orderModel');
 
 const registerUser = async (data) => {
   const { username, email, password } = data;
@@ -178,6 +178,20 @@ const resetPassword = async (email, newPassword) => {
   return { message: "Password reset successful" };
 };
 
+const displayAllUsers = async () => {
+  const users = await User.find();
+  return users;
+};
+
+const displaySpecificUser = async (userNumber) => {
+  const user = await User.findOne({ userNumber });
+  if (!user) throw new Error("User not found");
+
+  const userOrders = await Order.find({ "user.userId": user._id }); // Match nested field
+  return { user, userOrders };
+};
+
+
 module.exports = {
   registerUser,
   loginUser,
@@ -185,5 +199,7 @@ module.exports = {
   updateAddress,
   sendOtpToEmail,
   verifyOtp,
-  resetPassword
+  resetPassword,
+  displayAllUsers,
+  displaySpecificUser
 };
